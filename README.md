@@ -1,25 +1,32 @@
-# plant-disease-mlops
-MLOps Zoomcamp final project: Plant disease classification: build an ML service to classify plant leaf images into disease categories (healthy vs various infections). The project starts from a standard dataset (PlantVillage) to grow it into a full MLOps pipeline with orchestration, deployment, testing, and monitoring. The project uses CNNs with MLflow, Prefect, Docker, and monitoring tools. It's folder structure is below:
+# 🌿 Plant Disease Classifier (MLOps Zoomcamp Final Project)
 
-```text
-plant-disease-mlops/
-├── data/
-├── notebooks/
-├── src/
-│   ├── data/
-│   ├── training/
-│   ├── inference/
-│   └── monitoring/
-├── Dockerfile
-├── prefect-flow.py
-├── requirements.txt
-└── README.md
+This project builds an ML service to classify plant leaf images into disease categories (e.g. healthy vs. infected). Starting with the standard PlantVillage dataset, the project evolves into a full MLOps pipeline with orchestration, training, deployment, monitoring, and CI/CD automation. Its folder structure is below:
+
+
 ```
-
+plant-disease-classifier/
+├── data/                        # Raw and processed datasets
+├── notebooks/                   # Jupyter notebooks for EDA & dev
+├── src/                         # All source code
+│   ├── preprocessing/           # Image loaders, augmentation, resizers
+│   ├── training/                # Model training code
+│   ├── inference/               # FastAPI & prediction utils
+│   └── monitoring/              # Drift detection, logging
+├── flows/
+│   └── prefect_flow.py          # Main Prefect pipeline definition
+├── models/                      # Saved models (optional if MLflow used)
+├── tests/                       # Pytest files for unit/integration testing
+├── Dockerfile                   # App Docker build instructions
+├── docker-compose.yaml          # Service orchestration: app, MLflow, monitoring
+├── requirements.txt             # Python dependencies
+├── mlruns/                      # Local MLflow tracking artifacts
+├── README.md                    # Project overview and instructions
+└── .gitignore                   # Files and folders to ignore in version control
+```
 
 ### 🛠️ Project Tool Breakdown
 
-| *Module*              | *Zoomcamp Tools*                   | *Description*                                                                   |
+| **Module**            | **Zoomcamp Tools**                 | **Description**                                                                |
 |-----------------------|------------------------------------|---------------------------------------------------------------------------------|
 | Data/Training Pipeline| Prefect, Docker, MLflow            | Automate data ingestion, augmentation, training with MLflow tracking & registry |
 | CI/CD                 | GitHub Actions                     | Run linting, tests, and trigger flows automatically                             |
@@ -31,7 +38,10 @@ plant-disease-mlops/
 
 
 
-The architecture diagram below gives a quick overview of the project's scope and design:
+### 🧭 Project Architecture
+
+The architecture diagram below illustrates the full MLOps workflow, from data ingestion and training to deployment, serving, and monitoring. A mobile app integration may be explored in future iterations.
+
 
 
 <img src="images/MLOps-Plant-Disease-Classifier.png" alt="Architecture Diagram" width="800"/>
