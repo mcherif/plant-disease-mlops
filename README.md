@@ -46,3 +46,7 @@ The architecture diagram below illustrates the full MLOps workflow, from data in
 
 <img src="images/MLOps-Plant-Disease-Classifier.png" alt="Architecture Diagram" width="800"/>
 
+### 🧠 Model Choice
+
+We use google/vit-base-patch16-224, a Vision Transformer (ViT) pretrained on ImageNet, as the core model for classifying plant diseases. We will fine-tune it using publicly available datasets such as PlantVillage to adapt it to agricultural disease recognition.
+In future iterations (beyond the scope of this project), we may explore lightweight or quantized variants of ViT for mobile deployment as a standalone extension.
