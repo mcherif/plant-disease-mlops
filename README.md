@@ -50,3 +50,33 @@ The architecture diagram below illustrates the full MLOps workflow, from data in
 
 We use google/vit-base-patch16-224, a Vision Transformer (ViT) pretrained on ImageNet, as the core model for classifying plant diseases. We will fine-tune it using publicly available datasets such as PlantVillage to adapt it to agricultural disease recognition.
 In future iterations (beyond the scope of this project), we may explore lightweight or quantized variants of ViT for mobile deployment as a standalone extension.
+
+## 🧹 Linting & Code Quality
+
+This project uses **GitHub Actions** for Continuous Integration (CI) to automate quality checks and ensure consistent, production-ready code.
+
+CI tasks include:
+
+- ✅ **Fast code linting with `ruff`**  
+  Runs on every push or pull request. It checks for PEP8 compliance and can auto-fix issues:
+
+  ```bash
+  ruff check . --fix
+  ```
+
+- ✅ **Running tests with `pytest`**  
+  Ensures that core functionality behaves as expected.
+
+- ✅ **(Optional) Docker image build**  
+  Verifies that the app builds correctly in a containerized environment.
+
+---
+
+We also use **`pylint` locally** for deeper static analysis and complexity checks.  
+Run it manually before major commits:
+
+```bash
+pylint src/
+```
+
+This dual approach gives us both speed (CI) and depth (manual analysis). 💪
