@@ -1,8 +1,87 @@
 # 🌿 Plant Disease Classifier (MLOps Zoomcamp Final Project)
 
-This project builds an ML service to classify plant leaf images into disease categories (e.g. healthy vs. infected). Starting with the standard PlantVillage dataset, the project evolves into a full MLOps pipeline with orchestration, training, deployment, monitoring, and CI/CD automation. Its folder structure is below:
+This project fine-tunes a Vision Transformer (ViT) model to classify plant leaf diseases using the PlantVillage dataset. It integrates modern MLOps tools for training, evaluation, reproducibility, and automation.
+
+## 🚀 Features
+
+- Vision Transformer (ViT) fine-tuning with Hugging Face Transformers
+- PyTorch + torchvision training pipeline
+- MLflow for experiment tracking
+- Prefect for orchestration
+- Docker containerization
+- GitHub Actions CI with Ruff + Pytest
+
+---
+
+### 🧭 Project Architecture
+
+The architecture diagram below illustrates the full MLOps workflow, from data ingestion and training to deployment, serving, and monitoring. A mobile app integration may be explored in future iterations.
 
 
+
+<img src="images/MLOps-Plant-Disease-Classifier.png" alt="Architecture Diagram" width="800"/>
+
+## ⚙️ Setup Instructions
+
+### 💻 Local Development (with GPU support)
+
+If you're developing locally and want to use a CUDA-enabled version of PyTorch:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+This will:
+
+- Install all core dependencies from `requirements.txt`
+- Enable CUDA support via `torch==2.1.0+cu118` (via `--extra-index-url`)
+- Install development tools like `pytest`, `ruff`, and `pylint`
+
+> ⚠️ Make sure your GPU and CUDA toolkit are compatible with this version of PyTorch. Visit [PyTorch installation guide](https://pytorch.org/get-started/locally/) if unsure.
+
+---
+
+### 🤖 Continuous Integration (CI) – GitHub Actions
+
+CI is handled via **GitHub Actions** and uses `requirements.txt` to:
+
+- ✅ Run fast code linting with [`ruff`](https://docs.astral.sh/ruff/)
+- ✅ Run unit tests using `pytest`
+- ✅ (Optionally) build a Docker image to ensure reproducibility
+
+CI runs automatically on every push or pull request to the `main` branch.
+
+---
+
+## 🧹 Linting & Code Quality
+
+This project uses **GitHub Actions** for Continuous Integration (CI) to automate quality checks and ensure consistent, production-ready code.
+
+CI tasks include:
+
+✅ **Fast code linting with `ruff`**  
+Runs on every push or pull request. It checks for PEP8 compliance and can auto-fix issues:
+
+```bash
+ruff check . --fix
+```
+
+✅ **Running tests with `pytest`**  
+Ensures that core functionality behaves as expected.
+
+✅ **(Optional) Docker image build**  
+Verifies that the app builds correctly in a containerized environment.
+
+We also use `pylint` locally for deeper static analysis and complexity checks.
+You should run it manually before major commits:
+
+```bash
+pylint src/
+```
+
+This dual approach gives us both speed (CI) and depth (manual analysis). 💪
+
+### File structure
 ```
 plant-disease-classifier/
 ├── data/                        # Raw and processed datasets
@@ -36,48 +115,3 @@ plant-disease-classifier/
 | Monitoring            | Evidently, Prometheus, Grafana     | Track data/prediction drift and log model metrics                               |
 | Retraining Trigger    | Prefect, Alerts (custom logic)     | Trigger retraining when drift or performance drops detected                     |
 | E2E Tests             | pytest, integration tests          | Test end-to-end pipeline from ingestion to prediction                           |
-
-
-
-### 🧭 Project Architecture
-
-The architecture diagram below illustrates the full MLOps workflow, from data ingestion and training to deployment, serving, and monitoring. A mobile app integration may be explored in future iterations.
-
-
-
-<img src="images/MLOps-Plant-Disease-Classifier.png" alt="Architecture Diagram" width="800"/>
-
-### 🧠 Model Choice
-
-We use google/vit-base-patch16-224, a Vision Transformer (ViT) pretrained on ImageNet, as the core model for classifying plant diseases. We will fine-tune it using publicly available datasets such as PlantVillage to adapt it to agricultural disease recognition.
-In future iterations (beyond the scope of this project), we may explore lightweight or quantized variants of ViT for mobile deployment as a standalone extension.
-
-## 🧹 Linting & Code Quality
-
-This project uses **GitHub Actions** for Continuous Integration (CI) to automate quality checks and ensure consistent, production-ready code.
-
-CI tasks include:
-
-- ✅ **Fast code linting with `ruff`**  
-  Runs on every push or pull request. It checks for PEP8 compliance and can auto-fix issues:
-
-  ```bash
-  ruff check . --fix
-  ```
-
-- ✅ **Running tests with `pytest`**  
-  Ensures that core functionality behaves as expected.
-
-- ✅ **(Optional) Docker image build**  
-  Verifies that the app builds correctly in a containerized environment.
-
----
-
-We also use **`pylint` locally** for deeper static analysis and complexity checks.  
-Run it manually before major commits:
-
-```bash
-pylint src/
-```
-
-This dual approach gives us both speed (CI) and depth (manual analysis). 💪
