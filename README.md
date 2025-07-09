@@ -18,7 +18,8 @@ plant-disease-classifier/
 ├── tests/                       # Pytest files for unit/integration testing
 ├── Dockerfile                   # App Docker build instructions
 ├── docker-compose.yaml          # Service orchestration: app, MLflow, monitoring
-├── requirements.txt             # Python dependencies
+├── requirements.txt             # Python dependencies for CI or production
+├── requirements-dev.txt         # Python dependencies for development
 ├── mlruns/                      # Local MLflow tracking artifacts
 ├── README.md                    # Project overview and instructions
 └── .gitignore                   # Files and folders to ignore in version control
