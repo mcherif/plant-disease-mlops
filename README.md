@@ -25,7 +25,7 @@ The architecture diagram below illustrates the full MLOps workflow, from data in
 
 ### 💻 Local Development (with GPU support)
 
-If you're developing locally and want to use a CUDA-enabled version of PyTorch:
+If you're developing locally and want to use a CUDA-optimized version of PyTorch:
 
 ```bash
 pip install -r requirements-dev.txt
