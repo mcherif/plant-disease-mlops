@@ -17,8 +17,10 @@ BATCH_SIZE = 16
 EXPERIMENT_NAME = "plant-disease-classifier"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-mlflow.set_tracking_uri("http://localhost:5000")
+if os.environ.get("CI", "false").lower() == "true":
+    mlflow.set_tracking_uri(f"file://{tempfile.gettempdir()}/mlruns")
+else:
+    mlflow.set_tracking_uri("http://localhost:5000")
 mlflow.set_experiment(EXPERIMENT_NAME)
 
 model = AutoModelForImageClassification.from_pretrained(MODEL_DIR).to(device)
