@@ -9,6 +9,7 @@ from torchvision.transforms import Lambda, Compose, Resize
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 from sklearn.metrics import accuracy_score, f1_score
 from collections import Counter
+import tempfile
 
 # === Config ===
 MODEL_DIR = "models/vit-finetuned"
