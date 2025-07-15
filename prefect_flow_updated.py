@@ -6,19 +6,11 @@ Usage:
 
 Arguments:
     --do_training: Optional flag (default=True). If set to false, the training step is skipped
-                   and the model is loaded from the local store (models/vit-finetuned).
+                   and the model is loaded from the local store (models\vit-finetuned).
 
 Logging:
     - MLflow is used to log whether the model was trained or loaded.
     - The same information is also printed to the console for quick feedback.
-
-Notes: Start an MLflow server before running your pipeline. Open a new terminal and run:
-    Option 1: Start a local MLflow server (recommended for development)
-        mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
-
-    Option 2: Start MLflow server with Docker
-        docker run -p 5000:5000 -v %cd%/mlruns:/mlflow/mlruns -e MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db -e MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/mlruns mlflow/mlflow:latest
-
 """
 
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
@@ -82,34 +74,16 @@ def load_data():
 
 @task
 def train_model(train_ds, val_ds, processor, class_mapping):
+
+    if not do_training:
+        print("⚠️ Skipping training, loading model from local path...")
+        model = AutoModelForImageClassification.from_pretrained("models\vit-finetuned").to(device)
+        return model
     mlflow.set_tracking_uri("http://localhost:5000")
     mlflow.set_experiment(EXPERIMENT_NAME)
 
-    if not do_training_flag:
-        print("⚠️ Skipping training, loading model from local path...")
-        if not os.path.exists(os.path.join(MODEL_DIR, "model.safetensors")):
-            raise FileNotFoundError(
-            f"❌ Model file not found in '{MODEL_DIR}'. "
-            "Please enable training (--do_training true) or provide a valid model."
-        )
-
-        with mlflow.start_run(run_name="prefect_load_model"):
-            mlflow.set_tag("model_status", "loaded_from_disk")
-
-        # Do NOT return the model object, just return the directory path
-        return MODEL_DIR
-
     train_loader = DataLoader(train_ds, batch_size=BATCH_SIZE, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=BATCH_SIZE)
-
-    if not os.path.exists(os.path.join(MODEL_DIR, "model.safetensors")):
-        raise FileNotFoundError(
-            f"❌ Model file not found in '{MODEL_DIR}'. "
-            "Please enable training (--do_training true) or provide a valid model."
-        )
-
-    with mlflow.start_run(run_name="prefect_load_model"):
-        mlflow.set_tag("model_status", "loaded_from_disk")
 
     model = AutoModelForImageClassification.from_pretrained(
         MODEL_NAME, num_labels=len(class_mapping), ignore_mismatched_sizes=True).to(device)
@@ -187,7 +161,6 @@ def train_model(train_ds, val_ds, processor, class_mapping):
                     print(f"⏹️ Early stopping triggered at epoch {epoch+1}")
                     break
 
-                mlflow.set_tag("model_status", "trained")
         model.save_pretrained(MODEL_DIR, safe_serialization=True)
         processor.save_pretrained(MODEL_DIR)
         mlflow.log_artifacts(MODEL_DIR, artifact_path="model")
@@ -243,17 +216,9 @@ def evaluate_model(model_dir, test_ds):
     test_ds.classes = [k for k, _ in sorted(class_mapping.items(), key=lambda x: x[1])]
     test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
-    if not os.path.exists(os.path.join(MODEL_DIR, "model.safetensors")):
-        raise FileNotFoundError(
-            f"❌ Model file not found in '{MODEL_DIR}'. "
-            "Please enable training (--do_training true) or provide a valid model."
-        )
-
-    mlflow.set_tag("model_status", "loaded_from_disk")
-
     model = AutoModelForImageClassification.from_pretrained(model_dir).to(device)
 
-    with mlflow.start_run(run_name="prefect_test_eval", nested=True):
+    with mlflow.start_run(run_name="prefect_test_eval"):
         test_loss, test_acc, test_f1 = evaluate(model, test_loader, test_ds.classes, debug=True)
         mlflow.log_metric("test_loss", test_loss)
         mlflow.log_metric("test_accuracy", test_acc)
