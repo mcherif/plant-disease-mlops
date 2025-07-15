@@ -31,7 +31,7 @@ jobs:
 
     - name: 🧹 Lint with Ruff
       run: |
-        ruff check . --fix
+        ruff check . --exclude PlantVillage-Dataset --fix
 
     - name: 🧪 Run tests with Pytest
       run: |
