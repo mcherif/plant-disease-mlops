@@ -18,18 +18,7 @@ Notes: Start an MLflow server before running your pipeline. Open a new terminal 
 
     Option 2: Start MLflow server with Docker
         docker run -p 5000:5000 -v %cd%/mlruns:/mlflow/mlruns -e MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db -e MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/mlruns mlflow/mlflow:latest
-
 """
-
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from prefect import flow, task
-
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--do_training', type=str, default='true', help='Set to false to skip training and load saved model')
-args = parser.parse_args()
-do_training_flag = args.do_training.lower() != 'false'
 
 import torch
 import os
@@ -40,11 +29,17 @@ from torchvision.transforms import Lambda, Compose, Resize
 from torch.utils.data import DataLoader
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 from torch import nn
-from sklearn.metrics import classification_report, accuracy_score, f1_score
-from collections import Counter
+from sklearn.metrics import classification_report, accuracy_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from prefect import flow, task
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--do_training', type=str, default='true', help='Set to false to skip training and load saved model')
+args = parser.parse_args()
+do_training_flag = args.do_training.lower() != 'false'
 
 # === Config ===
 EPOCHS = 10
