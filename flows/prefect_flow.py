@@ -78,7 +78,7 @@ def load_data():
 
 @task
 def train_model(train_ds, val_ds, processor, class_mapping):
-    if os.environ.get("CI"):
+    if os.environ.get("CI", "false").lower() == "true":
         mlflow.set_tracking_uri(f"file://{tempfile.gettempdir()}/mlruns")
     else:
         mlflow.set_tracking_uri("http://localhost:5000")
@@ -234,7 +234,10 @@ def evaluate(model, loader, class_names, debug=False):
 
 @task
 def evaluate_model(model_dir, test_ds):
-    mlflow.set_tracking_uri("http://localhost:5000")
+    if os.environ.get("CI", "false").lower() == "true":
+        mlflow.set_tracking_uri(f"file://{tempfile.gettempdir()}/mlruns")
+    else:
+        mlflow.set_tracking_uri("http://localhost:5000")
     mlflow.set_experiment(EXPERIMENT_NAME)
 
     with open(os.path.join(model_dir, "class_mapping.json")) as f:
