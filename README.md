@@ -115,3 +115,15 @@ plant-disease-classifier/
 | Monitoring            | Evidently, Prometheus, Grafana     | Track data/prediction drift and log model metrics                               |
 | Retraining Trigger    | Prefect, Alerts (custom logic)     | Trigger retraining when drift or performance drops detected                     |
 | E2E Tests             | pytest, integration tests          | Test end-to-end pipeline from ingestion to prediction                           |
+
+
+### 📁 Script Overview
+
+| Script                | Purpose                                      | Usage Context                  | Runs MLflow? | CI-Safe? | Prefect Required |
+|------------------------|----------------------------------------------|--------------------------------|--------------|----------|------------------|
+| `prefect_flow.py`      | Full pipeline: data → train → evaluate       | Production runs, automation    | ✅ Yes       | ⚠️ No\*  | ✅ Yes           |
+| `train_vit.py`         | Train ViT model with MLflow logging          | Fast local iteration, dev work | ✅ Yes       | ⚠️ No\*  | ❌ No            |
+| `evaluate_test.py`     | Load + evaluate model, log metrics           | CI/CD model sanity checks      | ✅ Yes       | ✅ Yes   | ❌ No            |
+| `demo_inference.ipynb` | Interactive inference on single/test images  | Local testing, model demos     | ❌ No        | ✅ Yes   | ❌ No            |
+
+> \* Not CI-safe by default unless model files are present or test skipping is used.

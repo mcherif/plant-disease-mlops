@@ -1,3 +1,45 @@
+"""
+train_classifier.py
+
+This script trains a Vision Transformer (ViT) model for plant disease classification
+using the Hugging Face Transformers and PyTorch libraries. The model is trained on a
+custom image dataset and logs metrics and artifacts using MLflow.
+
+Key Features:
+-------------
+- Loads and preprocesses images from a local `ImageFolder` dataset.
+- Uses a pretrained ViT (`google/vit-base-patch16-224`) from Hugging Face Transformers.
+- Performs training and validation with configurable hyperparameters.
+- Logs training and validation metrics (accuracy, F1-score, loss) to an MLflow tracking server.
+- Saves the fine-tuned model and processor to `models/vit-finetuned/`.
+
+Configuration:
+--------------
+- Dataset must be stored under `data/split/` with `train/` and `val/` subfolders.
+- Trained model is saved to `models/vit-finetuned/`.
+- Requires MLflow server running at `http://localhost:5000`.
+
+Intended Use:
+-------------
+- Local training of the classifier as part of the MLOps pipeline.
+- Can be run manually to fine-tune or re-train the ViT model on updated datasets.
+
+Example:
+--------
+Run directly with Python:
+
+    python train_classifier.py
+
+Dependencies:
+-------------
+- torch
+- torchvision
+- transformers
+- scikit-learn
+- mlflow
+
+"""
+
 import os
 import torch
 import mlflow

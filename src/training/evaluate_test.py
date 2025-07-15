@@ -1,3 +1,34 @@
+"""
+evaluate_test.py
+
+This script defines a pytest-based integration test for evaluating a fine-tuned
+Vision Transformer (ViT) model on a plant disease classification dataset.
+
+Key Features:
+-------------
+- Loads a saved Hugging Face ViT model and its associated processor.
+- Applies consistent image preprocessing using the same processor.
+- Loads the test dataset and applies class label remapping.
+- Evaluates the model using accuracy and weighted F1-score.
+- Logs evaluation metrics to MLflow for experiment tracking.
+- Skips the test automatically in CI environments if the model checkpoint
+  (pytorch_model.bin) is missing, to prevent unnecessary failures.
+
+Intended Use:
+-------------
+- Run as part of your CI/CD test suite to validate that the trained model can
+  be correctly loaded and evaluated.
+- Can be executed manually with `pytest src/training/evaluate_test.py`.
+
+Requirements:
+-------------
+- A trained model saved in `models/vit-finetuned/`
+- A test dataset in `data/split/test/`
+- MLflow tracking server (or CI-compatible fallback using local filesystem)
+
+"""
+
+
 import os
 import json
 import torch
