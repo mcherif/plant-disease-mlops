@@ -41,21 +41,9 @@ This will:
 
 ---
 
-### 🤖 Continuous Integration (CI) – GitHub Actions
-
-CI is handled via **GitHub Actions** and uses `requirements.txt` to:
-
-- ✅ Run fast code linting with [`ruff`](https://docs.astral.sh/ruff/)
-- ✅ Run unit tests using `pytest`
-- ✅ (Optionally) build a Docker image to ensure reproducibility
-
-CI runs automatically on every push or pull request to the `main` branch.
-
----
-
 ## 🧹 Linting & Code Quality
 
-This project uses **GitHub Actions** for Continuous Integration (CI) to automate quality checks and ensure consistent, production-ready code.
+This project uses **GitHub Actions** for Continuous Integration (CI) to automate quality checks and ensure consistent, production-ready code. 
 
 CI tasks include:
 
@@ -121,7 +109,7 @@ plant-disease-classifier/
 
 | Script                | Purpose                                      | Usage Context                  | Runs MLflow? | CI-Safe? | Prefect Required |
 |------------------------|----------------------------------------------|--------------------------------|--------------|----------|------------------|
-| `prefect_flow.py`      | Full pipeline: data → train → evaluate       | Production runs, automation    | ✅ Yes       | ⚠️ No\*  | ✅ Yes           |
+| `prefect_flow.py`      | Full pipeline: data → train → evaluate       | Production runs, automation    | ✅ Yes       | ✅ Yes*  | ✅ Yes           |
 | `train_vit.py`         | Train ViT model with MLflow logging          | Fast local iteration, dev work | ✅ Yes       | ⚠️ No\*  | ❌ No            |
 | `evaluate_test.py`     | Load + evaluate model, log metrics           | CI/CD model sanity checks      | ✅ Yes       | ✅ Yes   | ❌ No            |
 | `demo_inference.ipynb` | Interactive inference on single/test images  | Local testing, model demos     | ❌ No        | ✅ Yes   | ❌ No            |

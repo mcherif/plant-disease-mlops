@@ -1,24 +1,31 @@
 """
-Prefect flow for training and evaluating a plant disease classifier.
+Plant Disease Classifier - Prefect Orchestration Pipeline
 
-Usage:
-    python prefect_flow.py --do_training=false
+This script defines a Prefect pipeline for end-to-end training, evaluation, and inference
+of a plant disease classification model based on the ViT (Vision Transformer) architecture.
+The pipeline covers data loading, model training, evaluation, and MLflow experiment tracking.
 
-Arguments:
-    --do_training: Optional flag (default=True). If set to false, the training step is skipped
-                   and the model is loaded from the local store (models/vit-finetuned).
+Main Features:
+- **Training Toggle:** Use the --do_training flag to control whether the model is (re)trained or simply loaded from disk.
+    - `python prefect_flow.py` (default: trains the model if not already trained)
+    - `python prefect_flow.py --do_training=false` (skips training and loads an existing model from `models/vit-finetuned`)
+- **MLflow Integration:** Logs metrics, parameters, model status (trained or loaded), and artifacts for reproducibility.
+- **Error Handling:** If `--do_training=false` is used and the model file does not exist, an error is raised, prompting you to either enable training or provide a valid model.
 
-Logging:
-    - MLflow is used to log whether the model was trained or loaded.
-    - The same information is also printed to the console for quick feedback.
-
-Notes: Start an MLflow server before running your pipeline. Open a new terminal and run:
-    Option 1: Start a local MLflow server (recommended for development)
+Requirements:
+- MLflow server must be running before you launch this pipeline.
+    - Example (local): 
         mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
 
-    Option 2: Start MLflow server with Docker
-        docker run -p 5000:5000 -v %cd%/mlruns:/mlflow/mlruns -e MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow.db -e MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/mlruns mlflow/mlflow:latest
+Arguments:
+    --do_training: [default=True] Set to 'false' to skip training and load model from disk.
+
+Summary:
+    This pipeline makes iterative experimentation easy. You can skip re-training for fast iteration or CI,
+    and keep all relevant information tracked with MLflow.
+
 """
+
 
 import torch
 import os
