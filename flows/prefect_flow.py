@@ -35,6 +35,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import argparse
+import tempfile
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--do_training', type=str, default='true', help='Set to false to skip training and load saved model')
@@ -78,7 +79,7 @@ def load_data():
 @task
 def train_model(train_ds, val_ds, processor, class_mapping):
     if os.environ.get("CI"):
-        mlflow.set_tracking_uri("file:///{tempfile.gettempdir()}/mlruns")
+        mlflow.set_tracking_uri(f"file://{tempfile.gettempdir()}/mlruns")
     else:
         mlflow.set_tracking_uri("http://localhost:5000")
 
