@@ -77,7 +77,11 @@ def load_data():
 
 @task
 def train_model(train_ds, val_ds, processor, class_mapping):
-    mlflow.set_tracking_uri("http://localhost:5000")
+    if os.environ.get("CI"):
+        mlflow.set_tracking_uri("file:///{tempfile.gettempdir()}/mlruns")
+    else:
+        mlflow.set_tracking_uri("http://localhost:5000")
+
     mlflow.set_experiment(EXPERIMENT_NAME)
 
     if not do_training_flag:
