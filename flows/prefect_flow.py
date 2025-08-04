@@ -27,6 +27,12 @@ Summary:
 """
 
 
+from evidently.metrics import Accuracy
+from evidently.metric_preset import DataDriftPreset, ClassificationPreset
+from evidently.report import Report
+import tempfile
+import argparse
+import matplotlib.pyplot as plt
 import torch
 import os
 import mlflow
@@ -40,12 +46,10 @@ from sklearn.metrics import classification_report, accuracy_score, f1_score, con
 from prefect import flow, task
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import argparse
-import tempfile
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--do_training', type=str, default='true', help='Set to false to skip training and load saved model')
+parser.add_argument('--do_training', type=str, default='true',
+                    help='Set to false to skip training and load saved model')
 args = parser.parse_args()
 do_training_flag = args.do_training.lower() != 'false'
 
@@ -68,12 +72,15 @@ def load_data():
     transform_fn = Compose([
         Resize((224, 224)),
         Lambda(lambda img: img.convert("RGB")),
-        Lambda(lambda img: processor(images=img, return_tensors="pt")["pixel_values"].squeeze())
+        Lambda(lambda img: processor(images=img, return_tensors="pt")
+               ["pixel_values"].squeeze())
     ])
 
-    train_ds = ImageFolder(os.path.join(DATA_DIR, "train"), transform=transform_fn)
+    train_ds = ImageFolder(os.path.join(
+        DATA_DIR, "train"), transform=transform_fn)
     val_ds = ImageFolder(os.path.join(DATA_DIR, "val"), transform=transform_fn)
-    test_ds = ImageFolder(os.path.join(DATA_DIR, "test"), transform=transform_fn)
+    test_ds = ImageFolder(os.path.join(DATA_DIR, "test"),
+                          transform=transform_fn)
 
     class_mapping = train_ds.class_to_idx
     os.makedirs(MODEL_DIR, exist_ok=True)
@@ -96,9 +103,9 @@ def train_model(train_ds, val_ds, processor, class_mapping):
         print("⚠️ Skipping training, loading model from local path...")
         if not os.path.exists(os.path.join(MODEL_DIR, "model.safetensors")):
             raise FileNotFoundError(
-            f"❌ Model file not found in '{MODEL_DIR}'. "
-            "Please enable training (--do_training true) or provide a valid model."
-        )
+                f"❌ Model file not found in '{MODEL_DIR}'. "
+                "Please enable training (--do_training true) or provide a valid model."
+            )
 
         with mlflow.start_run(run_name="prefect_load_model"):
             mlflow.set_tag("model_status", "loaded_from_disk")
@@ -169,13 +176,15 @@ def train_model(train_ds, val_ds, processor, class_mapping):
                 for x, y in val_loader:
                     x, y = x.to(device), y.to(device)
                     out = model(pixel_values=x)
-                    val_preds.extend(torch.argmax(out.logits, dim=1).cpu().numpy())
+                    val_preds.extend(torch.argmax(
+                        out.logits, dim=1).cpu().numpy())
                     val_labels.extend(y.cpu().numpy())
 
             val_acc = accuracy_score(val_labels, val_preds)
             val_f1 = f1_score(val_labels, val_preds, average="weighted")
 
-            mlflow.log_metric("train_loss", total_loss / len(train_loader), step=epoch)
+            mlflow.log_metric("train_loss", total_loss /
+                              len(train_loader), step=epoch)
             mlflow.log_metric("train_accuracy", acc, step=epoch)
             mlflow.log_metric("train_f1", f1, step=epoch)
             mlflow.log_metric("val_accuracy", val_acc, step=epoch)
@@ -221,7 +230,8 @@ def evaluate(model, loader, class_names, debug=False):
     f1 = f1_score(labels, preds, average="weighted")
 
     if debug:
-        report = classification_report(labels, preds, target_names=class_names, output_dict=True)
+        report = classification_report(
+            labels, preds, target_names=class_names, output_dict=True)
         os.makedirs("artifacts", exist_ok=True)
         with open("artifacts/classification_report.json", "w") as f:
             json.dump(report, f, indent=4)
@@ -250,7 +260,8 @@ def evaluate_model(model_dir, test_ds):
     with open(os.path.join(model_dir, "class_mapping.json")) as f:
         class_mapping = json.load(f)
 
-    test_ds.classes = [k for k, _ in sorted(class_mapping.items(), key=lambda x: x[1])]
+    test_ds.classes = [k for k, _ in sorted(
+        class_mapping.items(), key=lambda x: x[1])]
     test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
 
     if not os.path.exists(os.path.join(MODEL_DIR, "model.safetensors")):
@@ -261,15 +272,69 @@ def evaluate_model(model_dir, test_ds):
 
     mlflow.set_tag("model_status", "loaded_from_disk")
 
-    model = AutoModelForImageClassification.from_pretrained(model_dir).to(device)
+    model = AutoModelForImageClassification.from_pretrained(
+        model_dir).to(device)
 
     with mlflow.start_run(run_name="prefect_test_eval", nested=True):
-        test_loss, test_acc, test_f1 = evaluate(model, test_loader, test_ds.classes, debug=True)
+        test_loss, test_acc, test_f1 = evaluate(
+            model, test_loader, test_ds.classes, debug=True)
         mlflow.log_metric("test_loss", test_loss)
         mlflow.log_metric("test_accuracy", test_acc)
         mlflow.log_metric("test_f1", test_f1)
         mlflow.log_artifacts("artifacts", artifact_path="eval_artifacts")
-        print(f"\n🧪 Test Evaluation → Loss: {test_loss:.4f} | Acc: {test_acc:.4f} | F1: {test_f1:.4f}")
+        print(
+            f"\n🧪 Test Evaluation → Loss: {test_loss:.4f} | Acc: {test_acc:.4f} | F1: {test_f1:.4f}")
+
+
+@task
+def monitor_model(test_ds, model_dir, threshold=0.85):
+    """
+    Run Evidently monitoring on test set predictions and trigger actions if metrics are below threshold.
+    """
+    # Load class mapping
+    with open(os.path.join(model_dir, "class_mapping.json")) as f:
+        class_mapping = json.load(f)
+    class_names = [k for k, _ in sorted(
+        class_mapping.items(), key=lambda x: x[1])]
+
+    # Load model
+    model = AutoModelForImageClassification.from_pretrained(
+        model_dir).to(device)
+    model.eval()
+
+    # Prepare data for Evidently
+    y_true, y_pred = [], []
+    for x, y in DataLoader(test_ds, batch_size=32):
+        x = x.to(device)
+        with torch.no_grad():
+            out = model(pixel_values=x)
+            preds = torch.argmax(out.logits, dim=1).cpu().numpy()
+        y_pred.extend(preds)
+        y_true.extend(y.numpy())
+
+    import pandas as pd
+    df = pd.DataFrame({"target": y_true, "prediction": y_pred})
+
+    # Generate Evidently report
+    report = Report(metrics=[ClassificationPreset()])
+    report.run(reference_data=df, current_data=df)
+    os.makedirs("artifacts", exist_ok=True)
+    report.save_html("artifacts/evidently_report.html")
+    report.save_json("artifacts/evidently_report.json")
+    mlflow.log_artifact("artifacts/evidently_report.html")
+    mlflow.log_artifact("artifacts/evidently_report.json")
+
+    # Check accuracy threshold
+    acc = accuracy_score(y_true, y_pred)
+    if acc < threshold:
+        print(
+            f"⚠️ Accuracy {acc:.3f} below threshold {threshold}! Triggering alert/retrain workflow.")
+        mlflow.set_tag("monitoring_alert",
+                       f"Accuracy below threshold: {acc:.3f}")
+        return False  # Indicates threshold violation
+    else:
+        print(f"✅ Accuracy {acc:.3f} meets threshold {threshold}.")
+        return True
 
 
 @flow(name="plant-disease-pipeline")
@@ -277,6 +342,11 @@ def plant_disease_pipeline():
     train_ds, val_ds, test_ds, processor, class_mapping = load_data()
     model_dir = train_model(train_ds, val_ds, processor, class_mapping)
     evaluate_model(model_dir, test_ds)
+    monitoring_passed = monitor_model(test_ds, model_dir)
+    if not monitoring_passed:
+        print("🚨 Triggering retraining or alert workflow!")
+        # Here you can add tasks for retraining, alerting, or switching models
+        # For example: retrain_model(), send_alert(), switch_model()
 
 
 if __name__ == "__main__":

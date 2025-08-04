@@ -115,3 +115,32 @@ plant-disease-classifier/
 | `demo_inference.ipynb` | Interactive inference on single/test images  | Local testing, model demos     | ❌ No        | ✅ Yes   | ❌ No            |
 
 > \* Not CI-safe by default unless model files are present or test skipping is used.
+
+
+## ▶️ Running the Prefect Flow
+
+The main pipeline is orchestrated by `flows/prefect_flow.py`. You can control whether to run the training step by using the `--do_training` argument.
+
+### Run Full Pipeline (with Training)
+
+```bash
+python flows/prefect_flow.py --do_training=true
+```
+
+This will execute all steps: data ingestion, preprocessing, model training, evaluation, and artifact logging.
+
+### Run Pipeline (Skip Training)
+
+```bash
+python flows/prefect_flow.py --do_training=false
+```
+
+
+> **Tip:**
+
+Make sure your MLflow server is running before you start the flow, from the root folder run the below:
+```bash
+mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
+```
+
+Your Python environment should have all dependencies installed (see requirements.txt).
