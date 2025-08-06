@@ -144,3 +144,74 @@ mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./
 ```
 
 Your Python environment should have all dependencies installed (see requirements.txt).
+
+## 🏃‍♂️ How to Run the Pipeline
+
+### 1. Install Dependencies
+
+**Recommended:** Use a virtual environment (venv, conda, etc.)
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate  # On Windows
+# or
+source .venv/bin/activate  # On Linux/Mac
+pip install -r requirements.txt
+```
+
+For GPU support (CUDA):
+```bash
+pip install -r requirements-dev.txt
+```
+
+### 2. Start MLflow Tracking Server
+
+From the project root:
+```bash
+mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
+```
+
+### 3. Run the Prefect Pipeline
+
+**With training:**
+```bash
+python flows/prefect_flow.py --do_training=true
+```
+
+**Skip training (use existing model):**
+```bash
+python flows/prefect_flow.py --do_training=false
+```
+
+Artifacts (metrics, confusion matrix, classification report) will be saved in the `artifacts/` folder and logged to MLflow.
+
+### 4. Monitor Results
+- View MLflow UI at: http://localhost:5000
+- Check `artifacts/` for evaluation outputs.
+
+---
+
+## 📦 Dependency Versions
+
+All dependencies are pinned in `requirements.txt` and `requirements-dev.txt`.
+
+**Key versions:**
+- Python >= 3.10
+- torch==2.1.0 (CPU, for CI)
+- torch==2.1.0+cu118 (GPU, for dev)
+- torchvision==0.16.0
+- transformers==4.38.2
+- mlflow==3.1.1
+- prefect==2.14.12
+- scikit-learn==1.7.0
+- pandas==2.3.0
+- matplotlib==3.10.3
+
+See the full list in `requirements.txt`.
+
+---
+
+## 🆘 Troubleshooting
+- If you see CUDA errors, check your PyTorch and CUDA versions.
+- If MLflow UI does not show runs, ensure you are logging to the correct tracking URI.
+- For Windows, use the provided `requirements-dev.txt` for compatibility.
