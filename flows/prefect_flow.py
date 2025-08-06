@@ -52,9 +52,6 @@ import matplotlib
 import numpy as np
 from PIL import Image
 
-# === Monitoring Integration Point ===
-# To add external monitoring (e.g., Deepchecks, Evidently), import and integrate here.
-# All Deepchecks/Evidently code has been removed for robustness and CI/CD compatibility.
 
 matplotlib.use("Agg")
 
@@ -305,12 +302,10 @@ def monitor_model(test_ds, model_dir: str, threshold: float = 0.85):
     # Load class mapping
     with open(os.path.join(model_dir, "class_mapping.json")) as f:
         class_mapping = json.load(f)
-    idx_to_class = {v: k for k, v in class_mapping.items()}
 
     # Load model and processor
     model = AutoModelForImageClassification.from_pretrained(
         model_dir).to(device)
-    processor = AutoImageProcessor.from_pretrained(model_dir)
     model.eval()
 
     # Prepare test loader
