@@ -294,21 +294,27 @@ def evaluate_model(model_dir, test_ds):
             f"\n🧪 Test Evaluation → Loss: {test_loss:.4f} | Acc: {test_acc:.4f} | F1: {test_f1:.4f}")
 
 
+def send_alert(message: str):
+    # Placeholder for alerting logic (email, Slack, etc.)
+    print(f"[ALERT] {message}")
+    # You can integrate with email, Slack, or other alerting services here
+
+
+def retrain_model(train_ds, val_ds, processor, class_mapping):
+    print("🔄 Retraining model due to threshold violation...")
+    return train_model.fn(train_ds, val_ds, processor, class_mapping)
+
+
 def monitor_model(test_ds, model_dir: str, threshold: float = 0.85):
     """
     Monitor test set performance using MLflow metrics only.
-    Triggers alert if accuracy drops below threshold.
+    Triggers alert and returns False if accuracy drops below threshold.
     """
-    # Load class mapping
-    with open(os.path.join(model_dir, "class_mapping.json")) as f:
-        class_mapping = json.load(f)
-
-    # Load model and processor
+    # with open(os.path.join(model_dir, "class_mapping.json")) as f:
+    #     class_mapping = json.load(f)
     model = AutoModelForImageClassification.from_pretrained(
         model_dir).to(device)
     model.eval()
-
-    # Prepare test loader
     test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
     preds, labels = [], []
     with torch.no_grad():
@@ -320,8 +326,10 @@ def monitor_model(test_ds, model_dir: str, threshold: float = 0.85):
     acc = accuracy_score(labels, preds)
     mlflow.log_metric("monitor_test_accuracy", acc)
     if acc < threshold:
-        print(
-            f"🚨 Accuracy {acc:.2f} below threshold {threshold:.2f}. Consider retraining or alerting.")
+        msg = f"🚨 Accuracy {acc:.2f} below threshold {threshold:.2f}. Triggering alert and conditional workflow."
+        print(msg)
+        send_alert(msg)
+        # Optionally, generate debugging dashboard (already done in evaluate_model)
         return False
     print(f"✅ Accuracy {acc:.2f} meets threshold {threshold:.2f}.")
     return True
@@ -334,9 +342,19 @@ def plant_disease_pipeline():
     evaluate_model(model_dir, test_ds)
     monitoring_passed = monitor_model(test_ds, model_dir)
     if not monitoring_passed:
-        print("🚨 Triggering retraining or alert workflow!")
-        # Here you can add tasks for retraining, alerting, or switching models
-        # For example: retrain_model(), send_alert(), switch_model()
+        print("🚨 Conditional workflow triggered: retraining and alerting.")
+        # Retrain model
+        model_dir = retrain_model(train_ds, val_ds, processor, class_mapping)
+        # Re-evaluate and monitor again
+        evaluate_model(model_dir, test_ds)
+        monitoring_passed = monitor_model(test_ds, model_dir)
+        if not monitoring_passed:
+            print("❌ Model still below threshold after retraining. Consider switching to a backup model or manual intervention.")
+            # Placeholder: switch_model(), escalate_issue(), etc.
+        else:
+            print("✅ Model passed monitoring after retraining.")
+    else:
+        print("✅ Monitoring passed. No action needed.")
 
 
 if __name__ == "__main__":
