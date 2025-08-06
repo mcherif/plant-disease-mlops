@@ -14,7 +14,7 @@ Main Features:
 
 Requirements:
 - MLflow server must be running before you launch this pipeline.
-    - Example (local): 
+    - Example (local):
         mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
 
 Arguments:
@@ -23,13 +23,17 @@ Arguments:
 Summary:
     This pipeline makes iterative experimentation easy. You can skip re-training for fast iteration or CI,
     and keep all relevant information tracked with MLflow.
-
+    # === Monitoring Integration Point ===
+    # If you wish to add external monitoring (e.g., Deepchecks, Evidently),
+    # add the integration in the monitor_model() task below.
 """
 
+from transformers import AutoImageProcessor
+from torchvision.transforms import Compose, Resize, Lambda
 
-from evidently.metrics import Accuracy
-from evidently.metric_preset import DataDriftPreset, ClassificationPreset
-from evidently.report import Report
+import pandas as pd
+from sklearn.metrics import accuracy_score
+from transformers import AutoModelForImageClassification
 import tempfile
 import argparse
 import matplotlib.pyplot as plt
@@ -45,6 +49,13 @@ from torch import nn
 from sklearn.metrics import classification_report, accuracy_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 from prefect import flow, task
 import matplotlib
+import numpy as np
+from PIL import Image
+
+# === Monitoring Integration Point ===
+# To add external monitoring (e.g., Deepchecks, Evidently), import and integrate here.
+# All Deepchecks/Evidently code has been removed for robustness and CI/CD compatibility.
+
 matplotlib.use("Agg")
 
 parser = argparse.ArgumentParser()
@@ -286,55 +297,39 @@ def evaluate_model(model_dir, test_ds):
             f"\n🧪 Test Evaluation → Loss: {test_loss:.4f} | Acc: {test_acc:.4f} | F1: {test_f1:.4f}")
 
 
-@task
-def monitor_model(test_ds, model_dir, threshold=0.85):
+def monitor_model(test_ds, model_dir: str, threshold: float = 0.85):
     """
-    Run Evidently monitoring on test set predictions and trigger actions if metrics are below threshold.
+    Monitor test set performance using MLflow metrics only.
+    Triggers alert if accuracy drops below threshold.
     """
     # Load class mapping
     with open(os.path.join(model_dir, "class_mapping.json")) as f:
         class_mapping = json.load(f)
-    class_names = [k for k, _ in sorted(
-        class_mapping.items(), key=lambda x: x[1])]
+    idx_to_class = {v: k for k, v in class_mapping.items()}
 
-    # Load model
+    # Load model and processor
     model = AutoModelForImageClassification.from_pretrained(
         model_dir).to(device)
+    processor = AutoImageProcessor.from_pretrained(model_dir)
     model.eval()
 
-    # Prepare data for Evidently
-    y_true, y_pred = [], []
-    for x, y in DataLoader(test_ds, batch_size=32):
-        x = x.to(device)
-        with torch.no_grad():
+    # Prepare test loader
+    test_loader = DataLoader(test_ds, batch_size=BATCH_SIZE, shuffle=False)
+    preds, labels = [], []
+    with torch.no_grad():
+        for x, y in test_loader:
+            x, y = x.to(device), y.to(device)
             out = model(pixel_values=x)
-            preds = torch.argmax(out.logits, dim=1).cpu().numpy()
-        y_pred.extend(preds)
-        y_true.extend(y.numpy())
-
-    import pandas as pd
-    df = pd.DataFrame({"target": y_true, "prediction": y_pred})
-
-    # Generate Evidently report
-    report = Report(metrics=[ClassificationPreset()])
-    report.run(reference_data=df, current_data=df)
-    os.makedirs("artifacts", exist_ok=True)
-    report.save_html("artifacts/evidently_report.html")
-    report.save_json("artifacts/evidently_report.json")
-    mlflow.log_artifact("artifacts/evidently_report.html")
-    mlflow.log_artifact("artifacts/evidently_report.json")
-
-    # Check accuracy threshold
-    acc = accuracy_score(y_true, y_pred)
+            preds.extend(torch.argmax(out.logits, dim=1).cpu().numpy())
+            labels.extend(y.cpu().numpy())
+    acc = accuracy_score(labels, preds)
+    mlflow.log_metric("monitor_test_accuracy", acc)
     if acc < threshold:
         print(
-            f"⚠️ Accuracy {acc:.3f} below threshold {threshold}! Triggering alert/retrain workflow.")
-        mlflow.set_tag("monitoring_alert",
-                       f"Accuracy below threshold: {acc:.3f}")
-        return False  # Indicates threshold violation
-    else:
-        print(f"✅ Accuracy {acc:.3f} meets threshold {threshold}.")
-        return True
+            f"🚨 Accuracy {acc:.2f} below threshold {threshold:.2f}. Consider retraining or alerting.")
+        return False
+    print(f"✅ Accuracy {acc:.2f} meets threshold {threshold:.2f}.")
+    return True
 
 
 @flow(name="plant-disease-pipeline")
