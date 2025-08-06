@@ -211,6 +211,56 @@ See the full list in `requirements.txt`.
 
 ---
 
+## 🚦 Model Inference API (FastAPI)
+
+You can serve the trained model as a REST API using FastAPI. The API supports image upload and returns the predicted class and confidence.
+
+### 1. Start the FastAPI Server
+
+From the project root, run:
+
+```powershell
+uvicorn src.inference.app:app --host 0.0.0.0 --port 8000
+```
+
+If port 8000 is busy, use another port (e.g., 8001):
+
+```powershell
+uvicorn src.inference.app:app --host 0.0.0.0 --port 8001
+```
+
+### 2. Test the API
+
+#### Health Check (GET)
+Open your browser or run:
+```powershell
+curl http://localhost:8000/
+```
+
+#### Predict Endpoint (POST)
+You can use Python or PowerShell to send an image for prediction.
+
+**Python example:**
+```python
+import requests
+
+url = "http://localhost:8000/predict/"
+with open("path_to_your_plant_image.jpg", "rb") as f:  # Replace with your image path
+    files = {"file": f}
+    response = requests.post(url, files=files)
+print(response.json())
+```
+
+**PowerShell example:**
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/predict/" -Method Post -Form @{file=Get-Item "path_to_your_plant_image.jpg"}
+```
+
+- Replace `path_to_your_plant_image.jpg` with the path to any plant image you want to classify.
+- You can also use the interactive Swagger UI at [http://localhost:8000/docs](http://localhost:8000/docs) to upload an image and test the API.
+
+---
+
 ## 🆘 Troubleshooting
 - If you see CUDA errors, check your PyTorch and CUDA versions.
 - If MLflow UI does not show runs, ensure you are logging to the correct tracking URI.
