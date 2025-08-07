@@ -261,6 +261,47 @@ Invoke-RestMethod -Uri "http://localhost:8000/predict/" -Method Post -Form @{fil
 
 ---
 
+## 🥒 Example: Test the /predict Endpoint (Docker)
+
+After running your Docker container:
+
+### Using curl (PowerShell)
+```powershell
+curl -X POST "http://localhost:8000/predict/" -H  "accept: application/json" -H  "Content-Type: multipart/form-data" -F "file=@example.jpg;type=image/jpeg"
+```
+Replace `example.jpg` with the path to your test image.
+
+### Using Swagger UI
+Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser, expand the `/predict/` endpoint, and upload an image file to test.
+
+---
+
+## 🐳 Docker: Build & Run the Inference API
+
+> **Note:** Do **not** upload large Docker images to GitHub. Instead, share your Dockerfile and instructions so others can build the image themselves.
+
+### 1. Build the Docker Image
+From the project root, run:
+```powershell
+docker build --no-cache -t plant-disease-classifier-prod .
+```
+
+### 2. Run the Docker Container
+To start the FastAPI server and expose it on port 8000:
+```powershell
+docker run -it --rm -p 8000:8000 plant-disease-classifier-prod
+```
+If port 8000 is busy, use another port (e.g., 8001):
+```powershell
+docker run -it --rm -p 8001:8000 plant-disease-classifier-prod
+```
+
+### 3. Test the API
+- Open [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
+- Or use curl/PowerShell as shown above to test `/predict/`.
+
+---
+
 ## 🆘 Troubleshooting
 - If you see CUDA errors, check your PyTorch and CUDA versions.
 - If MLflow UI does not show runs, ensure you are logging to the correct tracking URI.
