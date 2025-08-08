@@ -302,6 +302,24 @@ docker run -it --rm -p 8001:8000 plant-disease-classifier-prod
 
 ---
 
+## 📦 Large File Support (Git LFS)
+
+This project uses [Git Large File Storage (LFS)](https://git-lfs.github.com/) to track large model files (such as `model.safetensors`).
+
+**Before cloning or pulling the repository, install Git LFS:**
+```bash
+git lfs install
+```
+
+If you have already cloned the repository and are missing large files, run:
+```bash
+git lfs pull
+```
+
+This ensures that all required model files are downloaded correctly for local development and deployment.
+
+---
+
 ## 🆘 Troubleshooting
 - If you see CUDA errors, check your PyTorch and CUDA versions.
 - If MLflow UI does not show runs, ensure you are logging to the correct tracking URI.
