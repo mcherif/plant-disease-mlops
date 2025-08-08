@@ -37,8 +37,8 @@ RUN pip uninstall -y multipart
 COPY models/vit-finetuned ./models/vit-finetuned
 COPY src/inference/app.py ./src/inference/app.py
 
-# Expose port
-EXPOSE 8000
+# Expose port for Hugging Face Spaces
+EXPOSE 7860
 
-# Start FastAPI app with Uvicorn (use PORT env variable set by Render)
-CMD uvicorn src.inference.app:app --host 0.0.0.0 --port $PORT
+# Start FastAPI app with Uvicorn on port 7860 (required by Hugging Face Spaces)
+CMD ["uvicorn", "src.inference.app:app", "--host", "0.0.0.0", "--port", "7860"]

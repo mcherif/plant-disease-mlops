@@ -220,27 +220,16 @@ You can serve the trained model as a REST API using FastAPI. The API supports im
 From the project root, run:
 
 ```powershell
+uvicorn src.inference.app:app --host 0.0.0.0 --port 7860
+```
+
+If port 7860 is busy, you can also run:
+
+```powershell
 uvicorn src.inference.app:app --host 0.0.0.0 --port 8000
 ```
 
-If you want to use a different port (e.g., 9000), set the `PORT` environment variable before running the server:
-
-**PowerShell:**
-```powershell
-$env:PORT=9000; uvicorn src.inference.app:app --host 0.0.0.0 --port $env:PORT
-```
-
-**Linux/Mac (bash):**
-```bash
-export PORT=9000
-uvicorn src.inference.app:app --host 0.0.0.0 --port $PORT
-```
-
-If port 8000 is busy, you can also run:
-
-```powershell
-uvicorn src.inference.app:app --host 0.0.0.0 --port 8001
-```
+> **Note:** On Hugging Face Spaces, the app must run on port 7860.
 
 ### 2. Test the API
 
