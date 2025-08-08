@@ -40,5 +40,5 @@ COPY src/inference/app.py ./src/inference/app.py
 # Expose port
 EXPOSE 8000
 
-# Start FastAPI app with Uvicorn (use PORT env variable if set, default to 8000)
-CMD uvicorn src.inference.app:app --host 0.0.0.0 --port ${PORT:-8000}
+# Start FastAPI app with Uvicorn (use PORT env variable set by Render)
+CMD uvicorn src.inference.app:app --host 0.0.0.0 --port $PORT

@@ -223,7 +223,20 @@ From the project root, run:
 uvicorn src.inference.app:app --host 0.0.0.0 --port 8000
 ```
 
-If port 8000 is busy, use another port (e.g., 8001):
+If you want to use a different port (e.g., 9000), set the `PORT` environment variable before running the server:
+
+**PowerShell:**
+```powershell
+$env:PORT=9000; uvicorn src.inference.app:app --host 0.0.0.0 --port $env:PORT
+```
+
+**Linux/Mac (bash):**
+```bash
+export PORT=9000
+uvicorn src.inference.app:app --host 0.0.0.0 --port $PORT
+```
+
+If port 8000 is busy, you can also run:
 
 ```powershell
 uvicorn src.inference.app:app --host 0.0.0.0 --port 8001
