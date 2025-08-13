@@ -50,8 +50,3 @@ def predict(file: UploadFile = File(...)):
         pred_class = idx_to_class[pred_idx]
         confidence = torch.softmax(outputs.logits, dim=1)[0, pred_idx].item()
     return {"class": pred_class, "confidence": confidence}
-
-
-@app.get("/")
-def root():
-    return {"message": "Plant Disease Classifier API. Use /predict/ to POST an image."}

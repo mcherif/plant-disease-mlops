@@ -31,7 +31,6 @@ Summary:
 from transformers import AutoImageProcessor
 from torchvision.transforms import Compose, Resize, Lambda
 
-import pandas as pd
 from sklearn.metrics import accuracy_score
 from transformers import AutoModelForImageClassification
 import tempfile
@@ -42,15 +41,11 @@ import os
 import mlflow
 import json
 from torchvision.datasets import ImageFolder
-from torchvision.transforms import Lambda, Compose, Resize
 from torch.utils.data import DataLoader
-from transformers import AutoImageProcessor, AutoModelForImageClassification
 from torch import nn
-from sklearn.metrics import classification_report, accuracy_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import classification_report, f1_score, confusion_matrix, ConfusionMatrixDisplay
 from prefect import flow, task
 import matplotlib
-import numpy as np
-from PIL import Image
 
 
 matplotlib.use("Agg")

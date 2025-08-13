@@ -1,5 +1,4 @@
 from transformers import AutoImageProcessor, AutoModelForImageClassification
-from PIL import Image
 import torch
 import json
 import os
