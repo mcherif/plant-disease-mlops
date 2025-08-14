@@ -9,14 +9,14 @@ pinned: false
 
 <!-- Logo/banner at top -->
 <p align="center">
-  <img src="images/plant-disease-logo.png" alt="Plant Disease API Logo" width="300"/>
+  <img src="images/plant-disease-logo.png" alt="Plant Disease Classifier Logo" width="300"/>
 </p>
 
 # 🌿 Plant Disease API
 
 <!-- Badges below title -->
 <p align="center">
-  <a href="https://huggingface.co/spaces/mcherif/plant-disease-api">
+  <a href="https://huggingface.co/spaces/mcherif/Plant-Disease-Classifier">
     <img src="https://img.shields.io/badge/HuggingFace-Space-blue?logo=huggingface" alt="Hugging Face Space"/>
   </a>
   <a href="https://github.com/mcherif/plant-disease-mlops/actions">

@@ -29,12 +29,15 @@ RUN pipdeptree > /app/dependency-tree.txt
 # Debugging step: List all installed packages
 RUN pip list > /app/installed-packages.txt
 
+# Debug: Output Python version and environment variables
+RUN python --version > /app/python-version.txt
+RUN env > /app/env.txt
+
 # Ensure multipart is removed
 RUN pip uninstall -y multipart
 
 # Copy model and app code
 COPY models/vit-finetuned ./models/vit-finetuned
-COPY src/inference/app.py ./src/inference/app.py
 
 # Copy FastAPI and Streamlit apps
 COPY ./app.py ./app.py
@@ -62,8 +65,14 @@ EXPOSE 7860
 
 # Default to Streamlit; override in docker run if you want FastAPI
 # to run FastAPI, we need to change the Dockerfile CMD and ensure the FastAPI app is set up to serve index.html and /predict/.
-CMD ["streamlit", "run", "app.py", "--server.port=7860", "--server.address=0.0.0.0"]
+# Debug: On container start, print environment info before running the app
+CMD python -c "import sys, os; print('Python:', sys.version); print('Env:', dict(os.environ));" && streamlit run app.py --server.port=7860 --server.address=0.0.0.0
 
+# Debug: List files in /app after copying everything
+RUN ls -lR /app > /app/files-list.txt
 
-# Start FastAPI app with Uvicorn on port 7860 (required by Hugging Face Spaces)
-#CMD ["uvicorn", "src.inference.app:app", "--host", "0.0.0.0", "--port", "7860"]
+# Debug: On container start, print environment info and list files before running the app
+CMD python -c "import sys, os; print('Python:', sys.version); print('Env:', dict(os.environ)); os.system('ls -lR /app');" && streamlit run app.py --server.port=7860 --server.address=0.0.0.0
+
+# To run FastAPI, uncomment below and comment out the Streamlit CMD above
+#CMD python -c "import sys, os; print('Python:', sys.version); print('Env:', dict(os.environ)); os.system('ls -lR /app');" && uvicorn src.inference.app_fastapi:app --host 0.0.0.0 --port 7860
