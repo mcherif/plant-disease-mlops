@@ -56,3 +56,14 @@ if uploaded_file is not None:
     except Exception as e:
         logging.error(f"Error during prediction: {e}")
         st.error(f"Error: {e}")
+
+// HF Gradio
+from app_gradio import demo
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", "7860"))
+    demo.launch(server_name="0.0.0.0", server_port=port)

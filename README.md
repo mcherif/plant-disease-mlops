@@ -1,10 +1,13 @@
 ---
 title: Plant Disease Classifier
 emoji: 🌿
-colorFrom: green
-colorTo: blue
-sdk: docker
 pinned: false
+short_description: Plant Disease Classifier based on ViT
+license: mit
+tags: ["plant disease classifier", "agriculture AI", "plant health", "crop monitoring", "gradio", "image-classification", "computer-vision", "pytorch", "transformers", "plants", ]
+sdk: docker
+app_file: src/app_gradio.py
+app_port: 7860
 ---
 
 <!-- Logo/banner at top -->
@@ -12,8 +15,7 @@ pinned: false
   <img src="images/plant-disease-logo.png" alt="Plant Disease Classifier Logo" width="300"/>
 </p>
 
-# 🌿 Plant Disease API
-
+# 🌿 Plant Disease Classifier
 <!-- Badges below title -->
 <p align="center">
   <a href="https://huggingface.co/spaces/mcherif/Plant-Disease-Classifier">
@@ -46,7 +48,7 @@ docker run -p 8000:8000 plant-app uvicorn src.inference.app_fastapi:app --host 0
 
 # Outline
 This project fine-tunes a Vision Transformer (ViT) model to classify plant leaf diseases using the PlantVillage dataset. It integrates modern MLOps tools for training, evaluation, reproducibility, and automation.
-A FastAPI-based plant disease detection service is added, and **Model accuracy:** 97.2% on the PlantVillage test set.
+A FastAPI-based plant disease detection service is added. 🎯 <mark><b>Model accuracy: 97.2%</b> on the PlantVillage test set</mark> (the power of Transfer Learning 🧠!).
 
 ## 🚀 Features
 
@@ -63,9 +65,7 @@ A FastAPI-based plant disease detection service is added, and **Model accuracy:*
 
 The architecture diagram below illustrates the full MLOps workflow, from data ingestion and training to deployment, serving, and monitoring. A mobile app integration may be explored in future iterations.
 
-
-
-<img src="images/MLOps-Plant-Disease-Classifier.png" alt="Architecture Diagram" width="800"/>
+<img src="images/MLOps-Plant-Disease-Classifier.png" alt="Architecture Diagram" width="560"/>
 
 ## ⚙️ Setup Instructions
 

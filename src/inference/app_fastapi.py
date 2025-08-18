@@ -69,3 +69,7 @@ def predict(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Error in predict: {e}")
         return {"error": str(e)}
+
+@app.get("/")
+def root():
+    return {"message": "Plant Disease Classifier API. Use /predict/ to POST an image."}
