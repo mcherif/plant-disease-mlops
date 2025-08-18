@@ -54,16 +54,14 @@ if uploaded_file is not None:
         st.write(f"**Prediction:** {prediction['class']}")
         st.write(f"**Confidence:** {prediction['confidence']:.2f}")
     except Exception as e:
-        logging.error(f"Error during prediction: {e}")
+        logging.exception("Error during prediction")
         st.error(f"Error: {e}")
 
-// HF Gradio
-from app_gradio import demo
-import os
-import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
+# Streamlit app ends here. Remove Gradio runner lines below to fix undefined names.
+# (Use src/app_gradio.py for Gradio.)
 
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", "7860"))
-    demo.launch(server_name="0.0.0.0", server_port=port)
+# Removed:
+# sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
+# if __name__ == "__main__":
+#     port = int(os.getenv("PORT", "7860"))
+#     demo.launch(server_name="0.0.0.0", server_port=port)

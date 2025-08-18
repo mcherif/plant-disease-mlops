@@ -32,6 +32,8 @@ def root():
         logger.error(f"Error loading index.html: {e}")
         return HTMLResponse(content="Error loading page.", status_code=500)
 
+# Remove any duplicate root() definition elsewhere in this file to fix F811.
+
 
 MODEL_DIR = "models/vit-finetuned"
 
@@ -69,7 +71,3 @@ def predict(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Error in predict: {e}")
         return {"error": str(e)}
-
-@app.get("/")
-def root():
-    return {"message": "Plant Disease Classifier API. Use /predict/ to POST an image."}

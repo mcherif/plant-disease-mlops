@@ -10,7 +10,6 @@ if DEBUG_MINIMAL:
 else:
     from PIL import Image
     import torch
-    import io
     import os
     import json
     from transformers import AutoImageProcessor, AutoModelForImageClassification

@@ -1,5 +1,4 @@
 import gradio as gr
-from PIL import Image
 import torch
 import os
 import json
